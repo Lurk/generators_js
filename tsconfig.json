@@ -4,7 +4,8 @@
     "allowJs": false,
     "lib": ["esnext", "dom"],
     "target": "esnext",
-    "moduleResolution": "node"
+    "moduleResolution": "node",
+    "module": "nodenext"
   },
   "include": ["./src/**/*"],
   "exclude": ["node_modules", "__tests__"]
