@@ -75,5 +75,5 @@ async function repeat(nameOfTheRun: string, startOver: boolean = true) {
       await run(n);
     }
   }
-  gather(nameOfTheRun);
+  await gather(nameOfTheRun);
 }
