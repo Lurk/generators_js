@@ -1,6 +1,6 @@
-import { add, suite, save } from "benny";
-import { fstat } from "fs";
-import cycle from "../node_modules/benny/lib/cycle";
+import { add, suite, save, cycle } from "benny";
+import { readdir, writeFile, access, constants, rmdir } from "fs/promises";
+import { join, parse } from "path";
 import { convertToSuperEntitiesWithGenerators } from "./generators";
 import { createLookupMap, getEntities } from "./helpers";
 import {
@@ -8,17 +8,23 @@ import {
   convertToSuperEntitiesWithLoop,
 } from "./index";
 import { convertToSuperEntitiesWithIterators } from "./iterators";
-import { readdir, writeFile } from "fs/promises";
-import { join, parse } from "path";
+
+function getFilename(postfix: number) {
+  return `benchmark_${postfix}`;
+}
+
+function getResultsDir(): string {
+  return join(__dirname, "../benchmark/results");
+}
 
 async function gather(name: string) {
-  const base_path = join(__dirname, "../benchmark/results");
-  const filenames = await readdir(base_path);
+  const basePath = getResultsDir();
+  const filenames = await readdir(basePath);
 
   const result = await Promise.all(
     filenames.map(async (filename) => {
       const size = parseInt(parse(filename).name.split("_")[1]);
-      const path = join(base_path, filename);
+      const path = join(basePath, filename);
       const data = await import(path);
       return data.results.map((r) => ({ ...r, size }));
     })
@@ -46,14 +52,28 @@ async function run(n: number) {
     add("iterators", () => {
       return convertToSuperEntitiesWithIterators(lookup, entities);
     }),
-    save({ file: `benchmark_${n}`, version: `${n}` }),
+    save({ file: getFilename(n), version: `${n}` }),
     cycle()
   );
 }
-
-async function repeat(name: string) {
-  for (let n = 100; n < 100000; n += 100) {
-    await run(n);
+async function exists(path: string): Promise<boolean> {
+  try {
+    await access(path, constants.F_OK);
+    return true;
+  } catch (e) {
+    return false;
   }
-  gather(name);
+}
+
+async function repeat(nameOfTheRun: string, startOver: boolean = true) {
+  const resultDir = getResultsDir();
+  if (startOver) {
+    await rmdir(resultDir, { recursive: true });
+  }
+  for (let n = 100; n < 100000; n += 10) {
+    if (startOver || !(await exists(join(resultDir, getFilename(n))))) {
+      await run(n);
+    }
+  }
+  gather(nameOfTheRun);
 }
