@@ -9,8 +9,8 @@ import {
 } from "./index";
 import { convertToSuperEntitiesWithIterators } from "./iterators";
 
-function getFilename(postfix: number) {
-  return `benchmark_${postfix}`;
+function getFilename(postfix: number, withExtension: boolean = false) {
+  return `benchmark_${postfix}${withExtension ? ".json" : ""}`;
 }
 
 function getResultsDir(): string {
@@ -71,7 +71,7 @@ async function repeat(nameOfTheRun: string, startOver: boolean = true) {
     await rmdir(resultDir, { recursive: true });
   }
   for (let n = 100; n < 100000; n += 10) {
-    if (startOver || !(await exists(join(resultDir, getFilename(n))))) {
+    if (startOver || !(await exists(join(resultDir, getFilename(n, true))))) {
       await run(n);
     }
   }
