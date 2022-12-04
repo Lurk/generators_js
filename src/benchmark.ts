@@ -11,7 +11,7 @@ import { convertToSuperEntitiesWithIterators } from "./iterators";
 import { readdir, writeFile } from "fs/promises";
 import { join, parse } from "path";
 
-async function gather() {
+async function gather(name: string) {
   const base_path = join(__dirname, "../benchmark/results");
   const filenames = await readdir(base_path);
 
@@ -24,7 +24,7 @@ async function gather() {
     })
   );
   return writeFile(
-    join(__dirname, "../benchmark/result.json"),
+    join(__dirname, `../benchmark/${name}.json`),
     JSON.stringify(result.flat())
   );
 }
@@ -51,9 +51,9 @@ async function run(n: number) {
   );
 }
 
-async function repeat() {
+async function repeat(name: string) {
   for (let n = 100; n < 100000; n += 100) {
     await run(n);
   }
-  gather();
+  gather(name);
 }
