@@ -18,15 +18,9 @@ export function map<InputType, OutputType>(
         next() {
           const { value, done } = iterator.next();
           if (done) {
-            return {
-              value: undefined,
-              done: true,
-            };
+            return { value: undefined, done: true };
           } else {
-            return {
-              value: functor(value),
-              done: false,
-            };
+            return { value: functor(value), done: false };
           }
         },
       };
@@ -58,15 +52,9 @@ export function filter<InputType, OutputType extends InputType>(
             done = result.done;
           }
           if (done) {
-            return {
-              value: undefined,
-              done: true,
-            };
+            return { value: undefined, done: true };
           } else {
-            return {
-              value,
-              done,
-            };
+            return { value, done };
           }
         },
       };
