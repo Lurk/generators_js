@@ -35,7 +35,7 @@ async function gather(name: string) {
   );
 }
 
-async function run(n: number) {
+function run(n: number) {
   const entities = getEntities(n);
   const lookup = createLookupMap(entities);
   return suite(
@@ -70,10 +70,17 @@ async function repeat(nameOfTheRun: string, startOver: boolean = true) {
   if (startOver) {
     await rmdir(resultDir, { recursive: true });
   }
-  for (let n = 100; n < 100000; n += 10) {
-    if (startOver || !(await exists(join(resultDir, getFilename(n, true))))) {
-      await run(n);
+  try {
+    for (let n = 100; n < 100000; n += 10) {
+      if (startOver || !(await exists(join(resultDir, getFilename(n, true))))) {
+        await run(n);
+      }
     }
+    await gather(nameOfTheRun);
+  } catch (e) {
+    console.error("---------------------------------------------");
+    console.error(e);
+    console.error("---------------------------------------------");
+    await repeat(nameOfTheRun, startOver);
   }
-  await gather(nameOfTheRun);
 }
